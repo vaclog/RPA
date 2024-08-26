@@ -167,10 +167,13 @@ class Db:
     def getTareasPendientes(self, proceso):
         print("Obteniendo Tareas....")
         try:
-            self.cursor.execute("SELECT id, proceso, parametros \
+            self.cursor.execute("SELECT id, proceso, parametros, \
+                                        concat(auth_user.nombre, ' ', auth_user.apellido) as nomape, \
+                                        robot_tarea.fecha_alta \
                                     FROM robot_tarea \
+                                    LEFT JOIN auth_user ON auth_user.user_id = robot_tarea.user_id \
                                     WHERE estado IN ( 0, 3) \
-                                      AND proceso = 'fecha_plaza_proceso' \
+                                      AND proceso IN ('fecha_plaza_proceso', 'doc_puerto_proceso') \
                                     ORDER BY fecha_alta asc")
             
             #print(self.cursor.rowcount)
@@ -180,13 +183,17 @@ class Db:
             if self.cursor.rowcount >= 1:
                 for table_row in self.cursor:
                     tareas.append([
-                        table_row[0],
-                        table_row[2]
+                        table_row[0], #id 0
+                        table_row[2], #parametros 1 
+                        table_row[3], #user 2 
+                        table_row[4], #fecha_alta 3
+                        table_row[1]  #proceso 4
+                        
                     ])
             else:
                 if self.cursor.rowcount == 1:
                     row= self.cursor.fetchone()
-                    tareas.append([row[0], row[2]])
+                    tareas.append([row[0], row[2], row[3], row[4], row[1]])
                 
             #print('tareas:' , tareas)
             return tareas

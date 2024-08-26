@@ -118,7 +118,7 @@ class Dux:
         print('ya existe fecha_pre_cumplido: ', fecha_pre_cumplido_value)
 
         btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
-        
+        imagename = self.SaveImage(numop)
         if( len(fecha_pre_cumplido_value) == 0 ):
             espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
             modificar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnModificar")
@@ -133,8 +133,83 @@ class Dux:
             espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnGuardar")))
             btn_guardar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
             time.sleep(3)
+            imagename = self.SaveImage(numop)
             #btn_cancelar.click()
             btn_guardar.click()
+            
+        return imagename
+    
+    def setDocPuerto(self, numop, fecha_a_plaza, user, fecha_alta):
+
+            wait = WebDriverWait(self.driver, 15)
+            time.sleep(5)
+            espera_carga = wait.until (EC.presence_of_all_elements_located( (By.CLASS_NAME, 'ctl00_Menu1_MenuLeft_Menu1_6')))
+            
+
+            wait = WebDriverWait(self.driver, 15)
+            
+            otros_datos = self.driver.find_element(By.XPATH, '/html/body/form/div[5]/nav/div[4]/div/div/div[1]/div[16]/table/tbody/tr[1]/td/table/tbody/tr/td/a')
+            
+            otros_datos.location_once_scrolled_into_view
+            self.driver.execute_script("arguments[0].click();", otros_datos)
+
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")))
+
+            buscar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")
+            operacion = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_txOperacionSeteable_AutoSuggestBox")
+            operacion.clear()
+            operacion.send_keys(numop)
+            buscar_op.click()
+
+            solapa_carga = self.driver.find_element(By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_Label13"]')
+
+            solapa_carga.location_once_scrolled_into_view
+            self.driver.execute_script("arguments[0].click();", solapa_carga)
+
+            #espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_ayuFechaPreCumplido_Fecha")))
+            #fecha_pre_cumplido = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ayuFechaPreCumplido_Fecha")
+
+            
+            #fecha_pre_cumplido_value = fecha_pre_cumplido.get_attribute('value')
+            #print('ya existe fecha_pre_cumplido: ', fecha_pre_cumplido_value)
+
+            btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
+            
+            
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
+            modificar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnModificar")
+            modificar_op.click()
+            
+            
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_CmdAlta")))
+            agregar_comentario_boton = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_CmdAlta")
+            agregar_comentario_boton.click()
+            
+            comentario = f"{fecha_a_plaza} CARPETA EN PUERTO ingresada por: {user} registrado a las: {fecha_alta}"
+            
+            txt_object = "ctl00_ContentPlaceHolder1_TextComentario_TextBox1"
+            
+            comentario_texto = self.driver.find_element(By.ID, txt_object)
+            comentario_texto.clear()
+            comentario_texto.send_keys(comentario)
+            
+            comentario_guardar = "ctl00_ContentPlaceHolder1_CmdGuardar_A"
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, comentario_guardar)))
+            comentario_guardar_boton = self.driver.find_element(By.ID, comentario_guardar)
+            comentario_guardar_boton.click()
+            
+            
+            espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnCancelar")))
+            
+            print(comentario)
+            btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnGuardar")))
+            btn_guardar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
+            time.sleep(3)
+            imagename = self.SaveImage(numop)
+            #btn_cancelar.click()
+            btn_guardar.click()
+            return imagename
 
     def backMainMenu(self):
         wait = WebDriverWait(self.driver, 15)
@@ -184,7 +259,7 @@ class Dux:
         print('fecha_a_plaza: ', fecha_aplaza_value)
 
         #btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
-        
+        imagename = self.SaveImage(numop)
         if( len(fecha_aplaza_value) == 0 ):
             time.sleep(3)
             espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
@@ -202,8 +277,9 @@ class Dux:
             btn_guardar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
             time.sleep(3)
             #btn_cancelar.click()
+            imagename = self.SaveImage(numop)
             btn_guardar.click()
-            
+        return imagename
             
     def testbtn(self, numop):
         wait = WebDriverWait(self.driver, 15)

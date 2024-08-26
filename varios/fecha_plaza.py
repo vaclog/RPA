@@ -15,8 +15,16 @@ import os
 import requests
 
 
-
-
+def setDocPuerto( operacion, fecha_a_plaza, user, fecha_alta):
+    try:
+        print('Iniciando Doc en puerto')
+        imagename = dux.dux.setDocPuerto(operacion, fecha_a_plaza, user, fecha_alta)
+        dux.dux.backMainMenu()
+        print("esperando proxima tarea DUX")
+        time.sleep(1)
+        return imagename
+    except:
+        raise
 
 def setFechaPlaza(numop, tipo_op, fecha_a_plaza):
 
@@ -24,13 +32,14 @@ def setFechaPlaza(numop, tipo_op, fecha_a_plaza):
         
         print("iniciando DUX")
         if( tipo_op == 'E'):
-            dux.dux.setInExpo(numop, fecha_a_plaza)
+            imagename = dux.dux.setInExpo(numop, fecha_a_plaza)
         else:
-            dux.dux.setInImpo(numop, fecha_a_plaza)
+            imagename = dux.dux.setInImpo(numop, fecha_a_plaza)
             
         dux.dux.backMainMenu()
         print("esperando proxima tarea DUX")
         time.sleep(1)
+        return imagename
     except:
         raise
 
@@ -54,22 +63,33 @@ try:
             print(y["numop"])
             fecha_temp = y["fecha_a_plaza"].split('-')
             fecha_a_plaza = fecha_temp[2]+"/"+fecha_temp[1]+"/"+fecha_temp[0]
-            skip_process = False
-            if 'continua_manana' in y:
-                
-                continua_manana = y["continua_manana"]
-                if "SI" in continua_manana:
-                    skip_process = True
-            
-            if not skip_process:
-                setFechaPlaza( y["numop"], y["tipo_op"], fecha_a_plaza)
+            proceso = tarea[4]
+            user = tarea[2]
+            fecha_alta = tarea[3]
+            if proceso == 'doc_puerto_proceso':
+                imagename = setDocPuerto( y["numop"], fecha_a_plaza, user, fecha_alta)
                 db.db.setEstadoTarea( current_task, 2)
-                imagename=dux.dux.SaveImage(current_task)
-                smtp.smtp.SendMail('asagula@vaclog.com', 'RPA_fecha_a_plaza -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=y["numop"], fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
+                
+                smtp.smtp.SendMail('asagula@vaclog.com', 'RPA_doc_en_puerto -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=y["numop"], fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
                 if os.path.isfile(imagename):
                     os.remove(imagename)
             else:
-                db.db.setEstadoTarea( current_task, 2, 'Salteado')
+                skip_process = False
+                if 'continua_manana' in y:
+                    
+                    continua_manana = y["continua_manana"]
+                    if "SI" in continua_manana:
+                        skip_process = True
+                
+                if not skip_process:
+                    imagename = setFechaPlaza( y["numop"], y["tipo_op"], fecha_a_plaza)
+                    db.db.setEstadoTarea( current_task, 2)
+                    #imagename=dux.dux.SaveImage(current_task)
+                    smtp.smtp.SendMail('asagula@vaclog.com', 'RPA_fecha_a_plaza -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=y["numop"], fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
+                    if os.path.isfile(imagename):
+                        os.remove(imagename)
+                else:
+                    db.db.setEstadoTarea( current_task, 2, 'Salteado')
         dux.dux.Close()
     print("FINALIZADO", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 except Exception as inst :
